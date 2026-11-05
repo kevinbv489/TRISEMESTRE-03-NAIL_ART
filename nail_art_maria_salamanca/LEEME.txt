@@ -1,0 +1,25 @@
+# Nail Art María Salamanca
+
+## Cómo abrir el sistema
+1. Descarga y descomprime `nail_art_maria_salamanca.zip`.
+2. Abre la carpeta `nail_art_maria_salamanca`.
+3. Haz doble clic en `index.html` o ábrelo con Google Chrome / Edge.
+
+No requiere instalación ni servidor para esta versión demostrativa.
+
+## Funciones incluidas
+- Navegación entre Inicio, Servicios, Agendar cita, Clientes y Citas.
+- Catálogo de servicios con precios y duración editables desde `app.js`.
+- Formulario de reserva con validación básica.
+- Evita registrar dos solicitudes en la misma fecha y hora.
+- Guarda citas en el almacenamiento local del navegador.
+- Lista de clientes calculada a partir de las reservas.
+- Panel de citas con filtros, confirmación, cancelación y eliminación.
+- Exportación de clientes y citas a CSV para abrir en Excel.
+- Diseño adaptable a celular y computador.
+
+## Importante: alcance de esta entrega
+Esta es una versión funcional de frontend para demostración. Los datos quedan guardados únicamente en el navegador y computador donde se registren. No hay base de datos compartida, usuarios/contraseñas, envío de correos ni sincronización entre dispositivos. Para uso real por varios usuarios se debe conectar un backend y una base de datos (por ejemplo Java + MySQL).
+
+## Personalización
+Los servicios de ejemplo, precios y duración están definidos al inicio de `app.js` en `defaultServices`. Cambia esos valores por los precios reales del negocio.
