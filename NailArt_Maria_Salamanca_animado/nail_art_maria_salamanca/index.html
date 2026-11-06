@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#9b6578">
+  <title>Nail Art María Salamanca</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" data-view="inicio" aria-label="Ir al inicio">
+      <span class="brand-mark">NA</span>
+      <span><strong>Nail Art</strong><small>María Salamanca</small></span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+    <nav id="mainNav">
+      <button class="nav-link active" data-view="inicio">Inicio</button>
+      <button class="nav-link" data-view="servicios">Servicios</button>
+      <button class="nav-link" data-view="agendar">Agendar cita</button>
+      <button class="nav-link" data-view="clientes">Clientes</button>
+      <button class="nav-link" data-view="citas">Citas</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="view active" id="view-inicio">
+      <div class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">BELLEZA · CUIDADO · ESTILO</span>
+          <h1>Un detalle en tus uñas,<br><em>una gran expresión</em></h1>
+          <p>Descubre nuestros servicios y reserva tu próximo momento de cuidado personal de forma fácil y rápida.</p>
+          <div class="hero-actions">
+            <button class="btn primary" data-go="agendar">Reservar una cita</button>
+            <button class="btn light" data-go="servicios">Ver servicios</button>
+          </div>
+        </div>
+        <div class="hero-art" aria-label="Diseño decorativo de uñas">
+          <div class="art-circle"></div><div class="nail nail-one"></div><div class="nail nail-two"></div><div class="nail nail-three"></div>
+          <span class="art-caption">Tu estilo, tus manos</span>
+        </div>
+      </div>
+      <div class="section-heading">
+        <div><span class="eyebrow">LO QUE OFRECEMOS</span><h2>Servicios destacados</h2></div>
+        <button class="text-button" data-go="servicios">Ver todos →</button>
+      </div>
+      <div class="service-grid" id="featuredServices"></div>
+      <div class="welcome-strip">
+        <div><span class="eyebrow">AGENDA EN LÍNEA</span><h2>Tu próxima cita está a unos clics.</h2><p>Elige el servicio, selecciona fecha y hora, y registra tus datos.</p></div>
+        <button class="btn primary" data-go="agendar">Agendar ahora</button>
+      </div>
+    </section>
+
+    <section class="view" id="view-servicios">
+      <div class="page-heading"><span class="eyebrow">NUESTRO CATÁLOGO</span><h1>Servicios</h1><p>Encuentra el cuidado y diseño ideal para ti.</p></div>
+      <div class="service-grid" id="allServices"></div>
+    </section>
+
+    <section class="view" id="view-agendar">
+      <div class="page-heading"><span class="eyebrow">RESERVA EN LÍNEA</span><h1>Agenda tu cita</h1><p>Completa los datos para solicitar tu espacio.</p></div>
+      <div class="booking-layout">
+        <form class="panel booking-form" id="bookingForm">
+          <h2>Datos de la reserva</h2>
+          <div class="form-grid">
+            <label>Nombre completo<input name="name" required minlength="3" placeholder="Ej. Laura Gómez"></label>
+            <label>Teléfono<input name="phone" required inputmode="tel" pattern="[0-9+ ()-]{7,}" placeholder="Ej. 3001234567"></label>
+            <label class="full">Correo electrónico <span class="optional">(opcional)</span><input name="email" type="email" placeholder="correo@ejemplo.com"></label>
+            <label class="full">Servicio<select name="service" id="serviceSelect" required><option value="">Selecciona un servicio</option></select></label>
+            <label>Fecha<input name="date" id="dateInput" type="date" required></label>
+            <label>Hora<select name="time" required id="timeSelect"><option value="">Selecciona una hora</option></select></label>
+            <label class="full">Notas adicionales <span class="optional">(opcional)</span><textarea name="notes" rows="3" placeholder="Cuéntanos si tienes alguna idea de diseño..."></textarea></label>
+          </div>
+          <div class="notice">La reserva quedará registrada en este navegador. El negocio deberá confirmar la disponibilidad.</div>
+          <button class="btn primary full-btn" type="submit">Confirmar solicitud</button>
+          <p class="form-message" id="bookingMessage" role="status"></p>
+        </form>
+        <aside class="panel booking-aside">
+          <div class="aside-icon">✦</div><h2>Antes de reservar</h2>
+          <ul><li>Selecciona el servicio que deseas.</li><li>Verifica que tus datos de contacto estén correctos.</li><li>La cita se guardará con estado <b>Pendiente</b>.</li></ul>
+          <div class="aside-note"><strong>¿Necesitas ayuda?</strong><p>Comunícate directamente con el establecimiento para confirmar horarios y disponibilidad.</p></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" id="view-clientes">
+      <div class="section-heading page-heading-inline"><div><span class="eyebrow">DIRECTORIO</span><h1>Clientes</h1><p>Consulta las personas registradas mediante las reservas.</p></div><button class="btn secondary" id="exportClients">Exportar CSV</button></div>
+      <div class="panel table-panel"><div class="table-tools"><input id="clientSearch" placeholder="Buscar por nombre o teléfono..." aria-label="Buscar clientes"><span id="clientCount" class="muted"></span></div>
+        <div class="table-scroll"><table><thead><tr><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Última reserva</th></tr></thead><tbody id="clientsBody"></tbody></table></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-citas">
+      <div class="section-heading page-heading-inline"><div><span class="eyebrow">CONTROL DE AGENDA</span><h1>Citas</h1><p>Administra las solicitudes registradas en este dispositivo.</p></div><button class="btn secondary" id="exportAppointments">Exportar citas</button></div>
+      <div class="stats-row" id="appointmentStats"></div>
+      <div class="panel table-panel"><div class="table-tools"><input id="appointmentSearch" placeholder="Buscar cliente o servicio..." aria-label="Buscar citas"><select id="statusFilter" aria-label="Filtrar por estado"><option value="Todas">Todos los estados</option><option>Pendiente</option><option>Confirmada</option><option>Cancelada</option></select></div>
+        <div class="table-scroll"><table><thead><tr><th>Cliente</th><th>Servicio</th><th>Fecha y hora</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="appointmentsBody"></tbody></table></div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="footer-brand">Nail Art <span>María Salamanca</span></div><p>Un espacio para resaltar tu estilo.</p><small>© <span id="year"></span> Nail Art María Salamanca · Sistema de gestión de citas</small></footer>
+  <div class="toast" id="toast" role="status"></div>
+
+  <!-- CHATBOT DE ATENCION -->
+  <button id="chatbotToggle" class="chatbot-toggle" aria-label="Abrir asistente virtual" title="Abrir asistente virtual">💬</button>
+  <section id="chatbotWindow" class="chatbot-window" aria-label="Asistente virtual" aria-live="polite">
+    <div class="chatbot-header">
+      <div><h3>Nail Art Assistant</h3><span>● Asistente virtual</span></div>
+      <button id="chatbotClose" aria-label="Cerrar chat">×</button>
+    </div>
+    <div id="chatbotMessages" class="chatbot-messages">
+      <div class="bot-message">¡Hola! 💗 Bienvenida a Nail Art María Salamanca. ¿En qué podemos ayudarte?</div>
+    </div>
+    <div id="chatbotOptions" class="chatbot-options">
+      <button data-option="servicios">Ver servicios</button>
+      <button data-option="precios">Consultar precios</button>
+      <button data-option="citas">Agendar una cita</button>
+      <button data-option="preguntas">Preguntas frecuentes</button>
+      <button data-option="contacto">Contacto</button>
+    </div>
+    <form id="chatbotForm" class="chatbot-input">
+      <input id="chatbotText" type="text" placeholder="Escribe tu mensaje..." autocomplete="off" aria-label="Escribe tu mensaje">
+      <button type="submit" aria-label="Enviar mensaje">➤</button>
+    </form>
+    <div class="chatbot-note">Asistente automático · Información de referencia</div>
+  </section>
+  <script src="app.js"></script>
+  <script src="chatbot/chatbot.js"></script>
+  <script src="animations.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Nail Art María Salamanca (diseño + chatbot)
+
+## Cómo abrir
+1. Descomprime el zip.
+2. Doble clic en `index.html` (Chrome o Edge). No requiere instalación.
+
+## Archivos
+- index.html        -> estructura de todas las pantallas + ventana del chatbot
+- styles.css        -> diseño del sitio y del chatbot
+- app.js            -> servicios, citas, clientes, exportar CSV
+- chatbot/chatbot.js -> lógica del asistente virtual
+- animations.js    -> transición entre páginas, barra de progreso y efecto onda en botones
+
+## Personalizar
+- Servicios y precios: `defaultServices` al inicio de app.js (el chatbot los lee de ahí automáticamente).
+- Teléfono, WhatsApp, dirección y horario del chatbot: bloque CONFIG al inicio de chatbot/chatbot.js.
+
+## Alcance
+Versión demostrativa: los datos se guardan solo en el navegador. Para uso real con varios usuarios se necesita backend y base de datos.

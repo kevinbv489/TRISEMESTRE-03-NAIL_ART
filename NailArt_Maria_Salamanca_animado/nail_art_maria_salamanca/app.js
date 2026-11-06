@@ -1,0 +1,42 @@
+const STORAGE_KEY = "nailArtMariaData_v1";
+const defaultServices = [
+  {id:"s1",name:"Manicure tradicional",description:"Limpieza, limado, cuidado de cutícula y esmaltado clásico.",price:25000,duration:45,icon:"✿"},
+  {id:"s2",name:"Semipermanente",description:"Esmaltado de larga duración con acabado brillante.",price:45000,duration:60,icon:"♡"},
+  {id:"s3",name:"Uñas acrílicas",description:"Extensión y construcción de uñas con acabado personalizado.",price:85000,duration:120,icon:"✧"},
+  {id:"s4",name:"Pedicure",description:"Cuidado de pies, uñas y esmaltado tradicional.",price:35000,duration:60,icon:"❀"},
+  {id:"s5",name:"Diseño de uñas",description:"Decoración personalizada para darle un toque único a tus uñas.",price:15000,duration:30,icon:"✦"},
+  {id:"s6",name:"Retiro de producto",description:"Retiro cuidadoso del producto aplicado anteriormente.",price:18000,duration:30,icon:"❋"}
+];
+let data = loadData();
+function loadData(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {services:defaultServices,appointments:[]}}catch{return {services:defaultServices,appointments:[]}}}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}
+const money = n => new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(n);
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+function escapeHTML(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function go(view){$$(".view").forEach(v=>v.classList.toggle("active",v.id===`view-${view}`));$$(".nav-link").forEach(b=>b.classList.toggle("active",b.dataset.view===view));$("#mainNav").classList.remove("open");if(view==="clientes")renderClients();if(view==="citas")renderAppointments();window.scrollTo({top:0,behavior:"smooth"})}
+function toast(msg){const el=$("#toast");el.textContent=msg;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),2600)}
+function serviceCard(s){return `<article class="service-card"><div class="service-icon">${s.icon}</div><h3>${escapeHTML(s.name)}</h3><p>${escapeHTML(s.description)}</p><div class="service-meta"><strong>${money(s.price)}</strong><span>${s.duration} min</span></div><button class="text-button" data-book="${s.id}">Reservar este servicio →</button></article>`}
+function renderServices(){$("#featuredServices").innerHTML=data.services.slice(0,3).map(serviceCard).join("");$("#allServices").innerHTML=data.services.map(serviceCard).join("");$("#serviceSelect").innerHTML='<option value="">Selecciona un servicio</option>'+data.services.map(s=>`<option value="${s.id}">${escapeHTML(s.name)} — ${money(s.price)}</option>`).join("")}
+function getClients(){const map=new Map();data.appointments.forEach(a=>{const key=a.phone.replace(/\D/g,"");if(!map.has(key)||map.get(key).date<a.date)map.set(key,a)});return [...map.values()].sort((a,b)=>a.name.localeCompare(b.name))}
+function renderClients(){const q=$("#clientSearch").value.toLowerCase();const clients=getClients().filter(c=>(c.name+" "+c.phone+" "+c.email).toLowerCase().includes(q));$("#clientCount").textContent=`${clients.length} cliente(s)`;$("#clientsBody").innerHTML=clients.length?clients.map(c=>`<tr><td><strong>${escapeHTML(c.name)}</strong></td><td>${escapeHTML(c.phone)}</td><td>${escapeHTML(c.email||"—")}</td><td>${formatDate(c.date)}</td></tr>`).join(""):'<tr><td colspan="4" class="empty">Aún no hay clientes registrados.</td></tr>'}
+function formatDate(d){if(!d)return "—";return new Date(d+"T12:00:00").toLocaleDateString("es-CO",{day:"2-digit",month:"short",year:"numeric"})}
+function renderAppointments(){const q=$("#appointmentSearch").value.toLowerCase(),filter=$("#statusFilter").value;const list=data.appointments.filter(a=>(filter==="Todas"||a.status===filter)&&(a.name+" "+a.service).toLowerCase().includes(q)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));$("#appointmentStats").innerHTML=[["Total",data.appointments.length],["Pendientes",data.appointments.filter(a=>a.status==="Pendiente").length],["Confirmadas",data.appointments.filter(a=>a.status==="Confirmada").length]].map(([l,n])=>`<div class="stat"><span>${l}</span><strong>${n}</strong></div>`).join("");$("#appointmentsBody").innerHTML=list.length?list.map(a=>`<tr><td><strong>${escapeHTML(a.name)}</strong><br><span class="muted">${escapeHTML(a.phone)}</span></td><td>${escapeHTML(a.service)}</td><td>${formatDate(a.date)} · ${escapeHTML(a.time)}</td><td><span class="status ${a.status}">${a.status}</span></td><td>${a.status!=="Cancelada"?`<button class="action-btn" data-confirm="${a.id}">Confirmar</button><button class="action-btn danger" data-cancel="${a.id}">Cancelar</button>`:"—"} <button class="action-btn danger" data-delete="${a.id}">Eliminar</button></td></tr>`).join(""):'<tr><td colspan="5" class="empty">No hay citas que coincidan con la búsqueda.</td></tr>'}
+function downloadCSV(filename,rows){const csv=rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\n");const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url)}
+function setMinDate(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());$("#dateInput").min=d.toISOString().slice(0,10)}
+function initTimes(){$("#timeSelect").innerHTML='<option value="">Selecciona una hora</option>'+Array.from({length:18},(_,i)=>{const h=9+Math.floor(i/2),m=i%2?"30":"00";return `<option>${String(h).padStart(2,"0")}:${m}</option>`}).join("")}
+document.addEventListener("click",e=>{
+ const nav=e.target.closest("[data-view]");if(nav){e.preventDefault();go(nav.dataset.view);return}
+ const goBtn=e.target.closest("[data-go]");if(goBtn){go(goBtn.dataset.go);return}
+ const book=e.target.closest("[data-book]");if(book){$("#serviceSelect").value=book.dataset.book;go("agendar");return}
+ const confirm=e.target.closest("[data-confirm]");if(confirm){const a=data.appointments.find(x=>x.id===confirm.dataset.confirm);if(a){a.status="Confirmada";save();renderAppointments();toast("Cita confirmada.")}return}
+ const cancel=e.target.closest("[data-cancel]");if(cancel){const a=data.appointments.find(x=>x.id===cancel.dataset.cancel);if(a&&confirm("¿Deseas cancelar esta cita?")){a.status="Cancelada";save();renderAppointments();toast("Cita cancelada.")}return}
+ const del=e.target.closest("[data-delete]");if(del&&confirm("¿Eliminar definitivamente esta cita?")){data.appointments=data.appointments.filter(a=>a.id!==del.dataset.delete);save();renderAppointments();renderClients();toast("Cita eliminada.")}
+});
+$("#bookingForm").addEventListener("submit",e=>{e.preventDefault();const f=new FormData(e.currentTarget),s=data.services.find(x=>x.id===f.get("service"));if(!s)return;const appointment={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),name:f.get("name").trim(),phone:f.get("phone").trim(),email:f.get("email").trim(),service:s.name,serviceId:s.id,date:f.get("date"),time:f.get("time"),notes:f.get("notes").trim(),status:"Pendiente",createdAt:new Date().toISOString()};if(data.appointments.some(a=>a.date===appointment.date&&a.time===appointment.time&&a.status!=="Cancelada")){toast("Ese horario ya tiene una solicitud. Elige otra hora.");return}data.appointments.push(appointment);save();e.currentTarget.reset();$("#bookingMessage").textContent="¡Solicitud registrada! Tu cita quedó en estado Pendiente.";toast("Reserva registrada correctamente.");renderAppointments()});
+$("#clientSearch").addEventListener("input",renderClients);$("#appointmentSearch").addEventListener("input",renderAppointments);$("#statusFilter").addEventListener("change",renderAppointments);
+$("#exportClients").addEventListener("click",()=>downloadCSV("clientes_nail_art.csv",[["Nombre","Teléfono","Correo","Última reserva"],...getClients().map(c=>[c.name,c.phone,c.email,formatDate(c.date)])]));
+$("#exportAppointments").addEventListener("click",()=>downloadCSV("citas_nail_art.csv",[["Cliente","Teléfono","Correo","Servicio","Fecha","Hora","Estado","Notas"],...data.appointments.map(a=>[a.name,a.phone,a.email,a.service,a.date,a.time,a.status,a.notes])]));
+$("#menuToggle").addEventListener("click",()=>$("#mainNav").classList.toggle("open"));
+$("#year").textContent=new Date().getFullYear();
+renderServices();initTimes();setMinDate();renderClients();renderAppointments();
