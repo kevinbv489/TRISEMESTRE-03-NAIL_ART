@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo de base de datos – Nail Art</title>
+<style>
+  :root {
+    --bg:#f2f2f2; --card:#ffffff; --text:#222222; --muted:#666666;
+    --accent:#333333; --line:#dddddd; --head:#eeeeee;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1e1e1e; --card:#2a2a2a; --text:#eeeeee; --muted:#aaaaaa; --accent:#eeeeee; --line:#444444; --head:#353535; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+  header { background:#333333; color:#ffffff; padding:24px; text-align:center; }
+  header h1 { margin:0 0 4px; font-size:1.6rem; }
+  header p { margin:0; opacity:.9; }
+  main { max-width:1000px; margin:24px auto; padding:0 16px; display:grid; gap:24px; }
+  .tabla { background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--line); }
+  .tabla h2 { margin:0 0 4px; color:var(--accent); }
+  .tabla h2 small { color:var(--muted); font-weight:normal; }
+  .desc { margin:0 0 14px; color:var(--muted); }
+  .scroll { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.93rem; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:var(--head); }
+  code { background:var(--head); padding:2px 6px; border-radius:5px; font-size:.88rem; }
+  .pk { font-weight:bold; }
+  .fk { font-weight:bold; }
+  .rel { background:var(--card); border-radius:12px; padding:20px; border:1px solid var(--line); }
+  .rel h2 { margin-top:0; color:var(--accent); }
+  .nota { color:var(--muted); font-size:.85rem; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Modelo de base de datos – Nail Art</h1>
+  <p>Base de datos: <strong>nailart</strong> · MySQL 8.x</p>
+</header>
+
+<main id="contenido"></main>
+
+<script>
+const tablas = [
+  {
+    nombre: 'users', titulo: 'Usuarios',
+    desc: 'Almacena la información personal y de acceso de los usuarios registrados en el sistema, incluyendo sus datos de contacto, rol y contraseña cifrada.',
+    campos: [
+      ['id', 'INT', 'PK', 'Identificador único de cada usuario registrado.'],
+      ['name', 'VARCHAR(80)', '', 'Nombre completo del usuario.'],
+      ['email', 'VARCHAR(120)', '', 'Correo electrónico del usuario.'],
+      ['phone', 'VARCHAR(20)', '', 'Número telefónico de contacto del usuario.'],
+      ['role', 'ENUM(...)', '', 'Rol o tipo de usuario dentro del sistema, por ejemplo, administrador o cliente.'],
+      ['password_hash', 'VARCHAR(255)', '', 'Contraseña almacenada mediante un proceso de cifrado hash para proteger el acceso.'],
+      ['created_at', 'DATETIME', '', 'Fecha y hora en que se creó el registro del usuario.']
+    ]
+  },
+  {
+    nombre: 'appointments', titulo: 'Citas',
+    desc: 'Almacena la información de las citas programadas en el sistema, incluyendo los datos del cliente, el servicio solicitado, la fecha, la hora y el estado de la cita.',
+    campos: [
+      ['id', 'CHAR(36)', 'PK', 'Identificador único de cada cita.'],
+      ['user_id', 'INT', 'FK', 'Identificador del usuario al que pertenece la cita.'],
+      ['name', 'VARCHAR(80)', '', 'Nombre de la persona que solicita la cita.'],
+      ['phone', 'VARCHAR(20)', '', 'Número telefónico de contacto de la persona que solicita la cita.'],
+      ['email', 'VARCHAR(120)', '', 'Correo electrónico de contacto de la persona que solicita la cita.'],
+      ['service_id', 'VARCHAR(20)', 'FK', 'Identificador del servicio seleccionado para la cita.'],
+      ['service_name', 'VARCHAR(80)', '', 'Nombre del servicio solicitado.'],
+      ['date', 'DATE', '', 'Fecha programada para realizar el servicio.'],
+      ['time', 'TIME', '', 'Hora programada para la cita.'],
+      ['notes', 'VARCHAR(500)', '', 'Observaciones o indicaciones adicionales relacionadas con la cita.'],
+      ['status', 'ENUM(...)', '', 'Estado actual de la cita, por ejemplo, pendiente, confirmada o cancelada.'],
+      ['created_at', 'DATETIME', '', 'Fecha y hora en que se registró la cita en el sistema.'],
+      ['active_slot', 'VARCHAR(20)', '', 'Identificador del espacio de tiempo reservado para controlar la disponibilidad y evitar cruces de citas.']
+    ]
+  },
+  {
+    nombre: 'services', titulo: 'Servicios',
+    desc: 'Almacena la información de los servicios ofrecidos por el establecimiento, incluyendo sus nombres, descripciones, precios, duración e información visual para mostrarlos en el sistema.',
+    campos: [
+      ['id', 'VARCHAR(20)', 'PK', 'Identificador único de cada servicio.'],
+      ['name', 'VARCHAR(80)', '', 'Nombre del servicio ofrecido.'],
+      ['description', 'VARCHAR(255)', '', 'Descripción de las características y detalles del servicio.'],
+      ['price', 'INT', '', 'Precio establecido para el servicio.'],
+      ['duration', 'SMALLINT', '', 'Tiempo estimado necesario para realizar el servicio, expresado en minutos.'],
+      ['icon', 'VARCHAR(8)', '', 'Código o referencia del icono utilizado para representar visualmente el servicio.'],
+      ['position', 'TINYINT', '', 'Posición u orden en el que aparece el servicio dentro del sistema.']
+    ]
+  },
+  {
+    nombre: 'sessions', titulo: 'Sesiones',
+    desc: 'Almacena la información de las sesiones de inicio de sesión de los usuarios, permitiendo controlar el acceso al sistema y administrar la vigencia de las sesiones activas.',
+    campos: [
+      ['token_hash', 'CHAR(64)', 'PK', 'Identificador seguro de la sesión almacenado mediante un hash.'],
+      ['user_id', 'INT', 'FK', 'Identificador del usuario al que pertenece la sesión.'],
+      ['expires_at', 'BIGINT', '', 'Fecha y hora en que vence la sesión de usuario.']
+    ]
+  }
+];
+
+const relaciones = [
+  ['users → appointments', 'Un usuario puede registrar varias citas, pero cada cita pertenece a un usuario.'],
+  ['users → sessions', 'Un usuario puede tener varias sesiones registradas, pero cada sesión pertenece a un usuario.'],
+  ['services → appointments', 'Un servicio puede estar asociado a varias citas, pero cada cita corresponde a un servicio.']
+];
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const marca = k => k === 'PK' ? '<span class="pk">PK</span>' : k === 'FK' ? '<span class="fk">FK</span>' : '';
+
+let html = '';
+tablas.forEach((t, i) => {
+  html += `
+  <section class="tabla">
+    <h2>${i + 1}. Tabla: ${esc(t.nombre)} <small>(${esc(t.titulo)})</small></h2>
+    <p class="desc"><strong>Descripción:</strong> ${esc(t.desc)}</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Campo</th><th>Tipo</th><th>Llave</th><th>Descripción</th></tr></thead>
+      <tbody>${t.campos.map(c => `
+        <tr><td><code>${esc(c[0])}</code></td><td>${esc(c[1])}</td><td>${marca(c[2])}</td><td>${esc(c[3])}</td></tr>`).join('')}
+      </tbody>
+    </table></div>
+  </section>`;
+});
+
+html += `
+  <section class="rel">
+    <h2>${tablas.length + 1}. Relaciones entre las tablas</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Relación</th><th>Descripción</th></tr></thead>
+      <tbody>${relaciones.map(r => `<tr><td><code>${esc(r[0])}</code></td><td>${esc(r[1])}</td></tr>`).join('')}</tbody>
+    </table></div>
+    <p class="nota">PK = llave primaria · FK = llave foránea</p>
+  </section>`;
+
+document.getElementById('contenido').innerHTML = html;
+</script>
+</body>
+</html>
